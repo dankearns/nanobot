@@ -29,6 +29,19 @@ Quick example:
       console.log(obj);
     }
 
+Output
+------
+
+    ...
+    { _id: 81,
+      status: 'no',
+      name: { first: 'ltlturrri', last: 'wrdaeliot' },
+      created: 'Fri Sep 28 2012 18:33:32 GMT-0700 (PDT)' }
+    { _id: 82,
+      status: 'maybe',
+      name: { first: 'wrdaeliot', last: 'wrdaeliot' },
+      created: 'Mon Oct 01 2012 18:33:32 GMT-0700 (PDT)' }
+    ...
 
 Enjoy!
 -------
