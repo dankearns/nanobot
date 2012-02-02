@@ -89,7 +89,7 @@ function strSet(size, gfn) {
     for(var i=0; i<n; ++i) {
         list.push(s());
     }
-    console.log(list);
+    //console.log(list);
     return selector(list);
 }
 
