@@ -58,12 +58,13 @@ Get Fancy
 
 The template expansion can be applied inside of generator functions as
 well, because all overengineered systems need recursion! Here we make
-the ingredients array a variable size for our simulate smoothies. We
+the ingredients array a variable size for our simulated smoothies. We
 could also create objects with variable field populations to
 simulate sparse attributes.
 
+    var fruitnames = ['strawberry','banana','mango','cherry','blueberry','kiwi','wheatgrass','soybeans'];
+    var fruit = nanobot.Factory.Value.selector(fruitnames);
     var names = nanobot.Factory.String.fromChars('bcdaeorst',6);
-    var fruit = nanobot.Factory.Value.selector(['strawberry','banana','mango','cherry','blueberry','kiwi','wheatgrass','soybeans']);
     var arrsz = nanobot.Factory.Number.normalInt(4,3);
     var amak = nanobot.Factory.Set.maker(arrsz, fruit);
 

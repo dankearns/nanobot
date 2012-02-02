@@ -104,8 +104,9 @@ function selector(list, idxFn) {
 }
 
 function fromChars(chars, mean, stdev) {
+    var m = Number(mean) && mean > 0 ? mean : 9;
     var cpicker = setNorm(chars.length);
-    var sizer = apNormInt(mean,stdev);
+    var sizer = apNormInt(m,stdev);
     return function() {
         var size = sizer();
         var str = "";
@@ -119,7 +120,7 @@ function fromChars(chars, mean, stdev) {
 function name(mean, stdev) {
     var m = Number(mean) ? mean : 9;
     var s = Number(stdev) ? stdev : 3;
-    var chars = "fyghjkbcdaeiourstlmnpvwxzq";
+    var chars = "fyghjkcdaiboamturslnpvwxzq";
     return fromChars(chars, m, s);
 }
 
