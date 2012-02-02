@@ -22,7 +22,9 @@ var Clones = function(obj) {
     var o = new t(obj);
     return function() {
         return o.map(function(node) {
-            if(typeof node == 'function') return node();
+            if(typeof node == 'function') {
+                this.update(node(),true);
+            }
             else return node;
         });
     }
@@ -59,6 +61,7 @@ var Factory = {
         step: step,
         log: function(step,start) { return stepOp(Math.log, step, start) },
         normal: apNorm,
+        normalInt: apNormInt,
         clampedNormal: clampedNorm,
         normalTail: normTail,
         setNormal: setNorm,
@@ -89,7 +92,6 @@ function strSet(size, gfn) {
     for(var i=0; i<n; ++i) {
         list.push(s());
     }
-    //console.log(list);
     return selector(list);
 }
 
