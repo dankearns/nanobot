@@ -95,9 +95,9 @@ ObjWriter is a convenience mechanism for creating a set of files, one
 per generated object. It will spread the generated files across a set
 of directories to avoid the dreaded 20-minute 'ls':
 
-var maker = nanobot.Clones(template);
-var w = new nanobot.ObjWriter(50000, maker);
-w.generate();
+    var maker = nanobot.Clones(template);
+    var w = new nanobot.ObjWriter(50000, maker);
+    w.generate();
 
 Output
 ---------
