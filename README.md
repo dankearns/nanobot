@@ -16,7 +16,7 @@ Quick Start:
     var vals = nanobot.Factory.String.fromSet(10);
 
     // create a selector which will return a value from a set we supply manually
-    var ynm = nanobot.Factory.Value.selector(['yes','no','maybe']);
+    var ynm = nanobot.Factory.Selector.byIndex(['yes','no','maybe']);
 
     // stuff our generator functions into our template object 
     var template = {
@@ -63,7 +63,7 @@ could also create objects with variable field populations to
 simulate sparse attributes.
 
     var fruitnames = ['strawberry','banana','mango','cherry','blueberry','kiwi','wheatgrass','soybeans'];
-    var fruit = nanobot.Factory.Value.selector(fruitnames);
+    var fruit = nanobot.Factory.Selector.byIndex(fruitnames);
     var names = nanobot.Factory.String.fromChars('bcdaeorst',6);
     var arrsz = nanobot.Factory.Number.normalInt(4,3);
     var amak = nanobot.Factory.Set.maker(arrsz, fruit);
@@ -88,4 +88,62 @@ Output
     { name: 'caear',
       ingredients: [ 'kiwi', 'cherry', 'blueberry', 'mango', 'soybeans' ] }
 
+ObjWriter
+----------
 
+ObjWriter is a convenience mechanism for creating a set of files, one
+per generated object. It will spread the generated files across a set
+of directories to avoid the dreaded 20-minute 'ls':
+
+var maker = nanobot.Clones(template);
+var w = new nanobot.ObjWriter(50000, maker);
+w.generate();
+
+Output
+---------
+
+    Done writing, output is in /tmp/objwriter.
+    Ok: 50020, Errored: 0 time: 35600ms
+
+    [nanobot] dan :-)ls /tmp/objwriter/
+    gen_0/ gen_1/ gen_2/ gen_3/ gen_4/ gen_5/
+    [nanobot] dan :-)ls /tmp/objwriter/gen_1/|head -n 10
+    obj_1.json
+    obj_10003.json
+    obj_10009.json
+    ...
+
+Correlated Values
+--------------------
+
+Say you need some values which are derived in some way from other values, nanobot.Value.Propagator is your friend!
+
+    var timeseq = nanobot.Factory.Date.forwardSeq(3, "day", new Date().getTime());
+    var wrapper = nanobot.Factory.Value.propagator(timeseq);
+    var startDate = wrapper.current;
+    var oneWeekLater = function() { 
+       var d = wrapper.current();
+       return d.setDate(d.getDate() + 7);
+    };
+
+    var template = { start: startDate, end: oneWeekLater };
+    var maker = nanobot.Clones(template);
+
+    // make an army of clones to do our nefarious bidding
+    for(var i=0; i<100; ++i) {
+      var obj = maker();
+      wrapper.next();
+      console.log(obj);
+    }
+
+    
+More Correlated Values
+------------------------
+
+    // create a set of 10 random strings, from which we will draw one member at a time
+    var vals = nanobot.Factory.String.fromSet(10);
+    // remember the last 10 values we've generated
+    var wrapper = nanobot.Factory.Value.propagator(vals, 10);
+    
+    var template = { current: wrapper.next, previous: wrapper.prevN(1), wayOld: wrapper.prevN(7) };
+    ...

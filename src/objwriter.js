@@ -1,4 +1,4 @@
-var nanobot = require('./src/nanobot');
+var nanobot = require('./nanobot');
 var _ = require('underscore');
 var fs = require('fs');
 var _path = require('path');

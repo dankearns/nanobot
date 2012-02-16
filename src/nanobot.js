@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var t = require('traverse');
+var _objwriter = require('./objwriter');
 
 /*
  * Clones returns a function which will deep-clone an object, except
@@ -19,15 +20,15 @@ var t = require('traverse');
  * clones == [{id:1}, {id:2}, ..., {id:100}]
  */
 var Clones = function(obj) {
-    var o = new t(obj);
-    return function() {
-        return o.map(function(node) {
-            if(typeof node == 'function') {
-                this.update(node(),true);
-            }
-            else return node;
-        });
-    }
+   var o = new t(obj);
+   return function() {
+      return o.map(function(node) {
+         if(typeof node == 'function') {
+            this.update(node(),true);
+         }
+         else return node;
+      });
+   }
 };
 
 /*
@@ -41,49 +42,98 @@ var Clones = function(obj) {
  *
  */
 var Factory = {
-    Set: {
-        maker: makeSet,
-    },
-    Array: {
-        maker: makeArr,
-    },
-    Object: {
-        maker: makeObj,
-        cloner: Clones,
-    },
-    Number: {
-        sin: function(step,start) { return stepOp(Math.sin, step, start) },
-        cos: function(step,start) { return stepOp(Math.cos, step, start) },
-        tan: function(step,start) { return stepOp(Math.tan, step, start) },
-        sqrt: function(step,start) { return stepOp(Math.sqrt, step, start) },
-        exp: function(step,start) { return stepOp(Math.exp, step, start)},
-        pow: function(step,start,pow) { return stepOp(function(x) { return Math.pow(x,pow) }, step, start) },
-        step: step,
-        log: function(step,start) { return stepOp(Math.log, step, start) },
-        normal: apNorm,
-        normalInt: apNormInt,
-        clampedNormal: clampedNorm,
-        normalTail: normTail,
-        setNormal: setNorm,
-    },
-    String: { 
-        fromChars: fromChars,
-        name: name,
-        phrase: phrase,
-        fromSet: strSet
-    },
-    Date: {
-        forwardSeq: function(step, label, start) { return dateSeq(true, step, label, start) }, 
-        reverseSeq: function(step, label, start) { return dateSeq(false, step, label, start) }  
-    },
-    Boolean: {
-        weightedUniform: boolDensity
-    },
-    Value: {
-        self: self,
-        selector: selector
-    }
+   Set: {
+      maker: makeSet,
+   },
+   Array: {
+      maker: makeArr,
+   },
+   Object: {
+      maker: makeObj,
+      cloner: Clones,
+   },
+   Number: {
+      sin: function(step,start) { return stepOp(Math.sin, step, start) },
+      cos: function(step,start) { return stepOp(Math.cos, step, start) },
+      tan: function(step,start) { return stepOp(Math.tan, step, start) },
+      sqrt: function(step,start) { return stepOp(Math.sqrt, step, start) },
+      exp: function(step,start) { return stepOp(Math.exp, step, start)},
+      pow: function(step,start,pow) { return stepOp(function(x) { return Math.pow(x,pow) }, step, start) },
+      step: step,
+      log: function(step,start) { return stepOp(Math.log, step, start) },
+      normal: apNorm,
+      normalInt: apNormInt,
+      clampedNormal: clampedNorm,
+      normalTail: normTail,
+      setNormal: setNorm,
+   },
+   String: { 
+      fromChars: fromChars,
+      name: name,
+      phrase: phrase,
+      fromSet: strSet
+   },
+   Date: {
+      forwardSeq: function(step, label, start) { return dateSeq(true, step, label, start) }, 
+      reverseSeq: function(step, label, start) { return dateSeq(false, step, label, start) }  
+   },
+   Boolean: {
+      weightedUniform: boolDensity
+   },
+   Value: {
+      self: self,
+      propagator: propagator
+   },
+   Selector: {
+      byWeight: weightedSelector,
+      byIndex: indexSelector
+   }
 };
+
+/*
+ * wvals: an array of items like [ { weight: 23.2, value: xxx }, ... ]
+ */
+function weightedSelector(wvals) {
+   // sum the weights so we can normalize to [0.0,1)
+   var totalWeight = _.reduce(wvals, function(memo, item) {
+      return memo + item.weight;
+   }, 0);
+   var normalizer = 1.0/totalWeight;
+   var pos = 0;
+   var itemlist = _.map(wvals, function(item) {
+      var last = pos;
+      pos += item.weight*normalizer;
+      return { lbound: last, ubound: pos, weight: item.weight, value: item.value };
+   });
+   
+   return function() {
+      var p = Math.random();
+      var entry = _.find(itemlist, function(item) {
+         return p >= item.lbound && p < item.ubound;
+      });
+      if(entry != null) {
+         return entry.value;
+      } else {
+         return null;
+      }
+   }
+}
+
+/*
+ * list: an array of values
+ * idxFn: a function which returns an index into the list
+ */
+function indexSelector(list, idxFn) {
+   if(!list || list.length==0) throw new Error("selector called with empty or missing list");
+   var ifn = typeof idxFn == 'function' ? idxFn : setNorm(list.length);
+   var len = list.length;
+    return function() {
+       var idx = ifn();
+       if(idx < 0) return list[0];
+       else if (idx >= len) return list[len-1];
+       else return list[idx];
+    }
+}
 
 function strSet(size, gfn) {
     var n = Number(size) && size > 0 ? size : 11;
@@ -92,16 +142,9 @@ function strSet(size, gfn) {
     for(var i=0; i<n; ++i) {
         list.push(s());
     }
-    return selector(list);
+    return indexSelector(list);
 }
 
-function selector(list, idxFn) {
-    if(!list || list.length==0) throw new Error("selector called with empty or missing list");
-    var ifn = typeof idxFn == 'function' ? idxFn : setNorm(list.length);
-    return function() {
-        return list[ifn()];
-    }
-}
 
 function fromChars(chars, mean, stdev) {
     var m = Number(mean) && mean > 0 ? mean : 9;
@@ -187,19 +230,21 @@ function makeSet(sizeFn, itemFn) {
     }
 }
 
-function step(step,start,inc) { 
+function step(step,start) { 
     return stepOp(function(x) { 
-        return x + inc;
+        return x;
     }, step, start) 
 }
 
 function stepOp(op, step, start) {
-    var se = Number(step) ? step : 1;
-    var x = Number(start) ? start : 0;
+   var se = Number(step) ? Number(step) : 1;
+   var pos = Number(start) ? Number(start) : 0;
     
     return function() {
-        x = Number(x+se);
-        return op(x);
+       // multiplying position*step seems to be less prone to
+       // aggregating floaty badness when step/start are non-integer
+       // (vs doing pos = pos+se)
+       return op((pos++)*se);
     }
 }
 
@@ -354,6 +399,40 @@ function entangle(g) {
 }
 
 /*
+ * Wrap a generator function in another function which allows a set of
+ * functions to be triggered by a single function.
+ */
+function propagator(fn, len) {
+   var s = Number(len) && len > 0 ? len : 1;
+   var v;
+   var h = [];
+   return {
+      next: function() {
+         v = fn();
+         if(h.push(v) > s) h.shift();
+         return v;
+      },
+      current: function() {
+         return v;
+      },
+      prev: function(i) {
+         var len = h.length;
+         var idx = Number(i) && i >=0 && i <len ? i : 0;
+         if(len == 0) return null;
+         return h[len - (1+idx)];
+      },
+      prevN: function(n) {
+         var i = (n >= 0 && n < len) ? Number(n) : 0;
+         return function() {
+            var l = h.length;
+            var idx = i < l ? l - (1+i) : l - 1;
+            return h[idx];
+         }
+      }
+   }
+}
+
+/*
  * Entangle a generator so another generator can peek at its last N values
  */
 function stack(g, n) {
@@ -385,3 +464,6 @@ exports.Utils = {
     stack: stack,
     sparsify: sparsify,
 };
+exports.ObjWriter = _objwriter.ObjWriter;
+
+
