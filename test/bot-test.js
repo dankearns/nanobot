@@ -295,7 +295,7 @@ var v = vows.describe('nanobot tests').addBatch({
          assert.equal(pg.prevN(9)(), 0); 
       }
    },
-   'the name generator' : {
+   'the person-name generator' : {
       topic: function() {
          var person = nb.Lists.person();
          this.callback(null, person);
@@ -305,7 +305,20 @@ var v = vows.describe('nanobot tests').addBatch({
          for(var i=0;i<10;++i) {
             names.push(gen());
          }
-         console.log(names);
+         assert.isTrue(/\w+ \w+/.test(names[8]));
+      }
+   },
+   'the product-name generator' : {
+      topic: function() {
+         var product = nb.Lists.product();
+         this.callback(null, product);
+      },
+      'should generate some names' : function(gen) {
+         var names = [];
+         for(var i=0;i<10;++i) {
+            names.push(gen());
+         }
+         assert.isTrue(/\w+/.test(names[8]));
       }
    }
 });
