@@ -1,6 +1,6 @@
 var vows = require('vows');
 var assert = require('assert');
-var nb = require('../src/nanobot');
+var nb = require('../');
 var _ = require('underscore');
 
 var obj1 = {hello: 'world', foo: { bar: 'bas' } };
@@ -295,6 +295,19 @@ var v = vows.describe('nanobot tests').addBatch({
          assert.equal(pg.prevN(9)(), 0); 
       }
    },
+   'the name generator' : {
+      topic: function() {
+         var person = nb.Lists.person();
+         this.callback(null, person);
+      },
+      'should generate some names' : function(gen) {
+         var names = [];
+         for(var i=0;i<10;++i) {
+            names.push(gen());
+         }
+         console.log(names);
+      }
+   }
 });
 
 
