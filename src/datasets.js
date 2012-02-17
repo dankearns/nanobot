@@ -21,9 +21,8 @@ WeightedList.prototype.generator = function() {
 
 WeightedList.prototype.load = function() {
    console.log('load: ' + this.path);
-   var data = JSON.parse(fs.readFileSync(this.path, 'utf-8'));
+   var data = JSON.parse(fs.readFileSync(this.path,"utf-8"));
    var list = [];
-
    this.gen = nb.Factory.Selector.byWeight(_.map(data.rows, function(row) { 
       if(row.weight == 0) {
          return { value: row.value, weight: 0.0001 };
@@ -31,15 +30,19 @@ WeightedList.prototype.load = function() {
          return row;
       }
    }));
-}
+};
 
-var person = function() {
+/*
+  * YMMV, but I think combining just last names generates much more interesting values!
+ */
+var person = function(lasts) {
    var last = new WeightedList(path.join(datadir, 'last_names.json')).generator();
-//   var first = new WeightedList(path.join(datadir, 'first_names.json')).generator();
-//   console.log(first() + " " + last());
+   var first = new WeightedList(path.join(datadir, 'first_names.json')).generator();
    return function() {
-      return last() + " " + last();
-//      return first() + " " + last();
+      if(lasts)
+         return last() + " " + last();
+      else
+         return first() + " " + last();
    }
 };
 

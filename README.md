@@ -147,3 +147,47 @@ More Correlated Values
     
     var template = { current: wrapper.next, previous: wrapper.prevN(1), wayOld: wrapper.prevN(7) };
     ...
+
+Useful Datasets
+-----------------
+
+nanobot.Factory.Lists includes a few functions which can generate
+useful lists of real-world values for things like people and
+products. The list values and/or weights are derived from public
+sources as indicated. Sample:
+
+    // straight-up census-weighted data:
+    var p =require('nanobot').Lists.person();
+    for(var i=0;i<100;++i) console.log(p);
+    ....
+    Thomas Rosen
+    Doris Bates
+    Joe Merritt
+    Sharon Jones
+    Andre Martin
+
+    // more fun: combine only surnames!
+    var p =require('nanobot').Lists.person(true);
+    for(var i=0;i<100;++i) console.log(p);
+    ....
+    Salerno Tremblay
+    Silva Shumaker
+    Stallings Hughes
+    Hannah Muscatello
+    Moore Givens
+    Hambrick Rocamora
+    Salgado Vitale
+    Glasgow Boone
+    Nichols Ackermann
+    Croom Gonsalves
+
+    // and some products:
+    var p =require('nanobot').Lists.person(true);
+    for(var i=0;i<100;++i) console.log(p);
+    ....
+    Bioguard Master Calcium Hypochlorite
+    Aqua Kill Insecticide
+    Care Free Booost
+    Rid-a-rat Rat & Mouse Killer
+
+You can use your own datasets by passing { value: '', weight: ''} pairs to nanobot.Selector.byWeight
