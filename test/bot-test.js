@@ -305,7 +305,8 @@ var v = vows.describe('nanobot tests').addBatch({
          for(var i=0;i<10;++i) {
             names.push(gen());
          }
-         assert.isTrue(/\w+ \w+/.test(names[8]));
+         assert.isString(names[8].first);
+         assert.isString(names[8].last);
       }
    },
    'the product-name generator' : {

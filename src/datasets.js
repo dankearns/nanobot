@@ -40,9 +40,9 @@ var person = function(lasts) {
    var first = new WeightedList(path.join(datadir, 'first_names.json')).generator();
    return function() {
       if(lasts)
-         return last() + " " + last();
+         return { first: last(), last: last() };
       else
-         return first() + " " + last();
+         return { first: first(), last: last() };
    }
 };
 
