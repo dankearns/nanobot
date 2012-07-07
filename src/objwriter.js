@@ -26,7 +26,7 @@ ObjWriter.prototype.generate = function() {
     var cb = function() { self.mkobjs(); };
     var path = this.path;
 
-    _path.exists(path, function(x) {
+    _fs.exists(path, function(x) {
         if(x) {
             fs.stat(path, function(err,stat) {
                 if(err) {
