@@ -20,7 +20,6 @@ WeightedList.prototype.generator = function() {
 };
 
 WeightedList.prototype.load = function() {
-   console.log('load: ' + this.path);
    var data = JSON.parse(fs.readFileSync(this.path,"utf-8"));
    var list = [];
    this.gen = nb.Factory.Selector.byWeight(_.map(data.rows, function(row) { 
