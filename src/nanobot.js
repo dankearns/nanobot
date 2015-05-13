@@ -345,19 +345,18 @@ function apNormInt(mean, stdev, n) {
  * off. Swap max/min vals to get one with only tails.
  */
 function clampedNorm(mean, stdev, min, max, n) {
-    var mi = Number(min) ? min : -1;
-    var ma = Number(max) ? max : -mi;
-    if(mi > ma) {
-        var x = mi;
-        mi = ma;
-        ma = x;
+  var mi = Number(min) ? min : -1;
+  var ma = Number(max) ? max : -mi;
+  g = apNorm(mean, stdev, n);
+  return function() {
+    var x;
+    if(mi < ma) {
+      do { x = g(); } while(x < mi || x > ma);
+    } else {
+      do { x = g(); } while(x < mi && x > ma);
     }
-    g = apNorm(mean, stdev, n);
-    return function() {
-        var x;
-        do { x = g(); } while(x < min || x > max);
-        return x;
-    }
+    return x;
+  }
 }
 
 function normTail(mean, stdev, lowpass, highpass, n) {
