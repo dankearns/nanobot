@@ -69,7 +69,7 @@ ObjWriter.prototype.mkdirs = function(cb) {
         var dirname = DIRPREFIX + i;
         var dirpath = this.path + "/" + dirname;
         self.dirnames.push(dirpath);
-        fs.mkdir(dirpath, 0777, function(err) {
+        fs.mkdir(dirpath, 0o777, function(err) {
             complete(err);
         });
     }
